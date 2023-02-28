@@ -1,17 +1,22 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 
 class Draw extends StatefulWidget{
+  final CollectionReference roomParticipants;
+  Draw({required this.roomParticipants});
   @override
-  _DrawState createState() => _DrawState();
+  _DrawState createState() => _DrawState(roomParticipants: roomParticipants);
   
 }
 class _DrawState extends State<Draw>{
+  final CollectionReference roomParticipants;
   List<DrawModel?> pointsList = [];
   final pointsStream = BehaviorSubject<List<DrawModel?>>(); // acts as a stack
   GlobalKey key =GlobalKey();
   bool _isDrawing = false;
+  _DrawState({required this.roomParticipants});
   //closing the BehaviorSubject
   @override
   void dispose(){
@@ -34,6 +39,7 @@ class _DrawState extends State<Draw>{
             paint.strokeCap = StrokeCap.round;
             pointsList.add(DrawModel(renderBox.globalToLocal(details.globalPosition), paint));
             pointsStream.add(pointsList);
+            //add to database
             _isDrawing = true;
           });
         },
@@ -48,6 +54,7 @@ class _DrawState extends State<Draw>{
           // representing the horizontal and vertical coordinates of the touch event, respectively
           pointsList.add(DrawModel(renderBox.globalToLocal(details.globalPosition), paint));
           pointsStream.add(pointsList);
+          //add to database
         },
         onPanEnd: (details){
           // pointsList.forEach((point) {
@@ -75,7 +82,9 @@ class _DrawState extends State<Draw>{
       ),
     ));
   }
-}
+}// _DrawState
+
+
 class DrawingPainter extends CustomPainter{ //declaring our custom painter
   final List<DrawModel?> pointsList;
 
@@ -83,7 +92,7 @@ class DrawingPainter extends CustomPainter{ //declaring our custom painter
 
   @override
   void paint(Canvas canvas, Size size) { // this is responsible for drawing
-    for(int i=0;i<pointsList.length;i++){
+    for(int i=0;i<pointsList.length-1;i++){
       if(pointsList[i]!=null && pointsList[i+1]!=null){
         canvas.drawLine(pointsList[i]!.offset, pointsList[i+1]!.offset, pointsList[i]!.paint);
         //drawLine(postion 1(x,y),postion 2(x,y), paint)
@@ -99,8 +108,8 @@ class DrawingPainter extends CustomPainter{ //declaring our custom painter
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
   }
-
 }
+
 
 class DrawModel{
   final Offset offset;

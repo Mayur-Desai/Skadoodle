@@ -4,21 +4,31 @@ import 'package:provider/provider.dart';
 import './drawing_room.dart';
 import './candidates_list.dart';
 import '../models/gamer.dart';
+import './canvas_widget.dart';
 class waitingRoom extends StatefulWidget {
   final CollectionReference roomParticipants;
   String roomId;
+  bool isAdmin;
 
-  waitingRoom({super.key, required this.roomParticipants,required this.roomId});
+  waitingRoom({super.key, required this.roomParticipants,required this.roomId,required this.isAdmin});
 
   @override
-  State<waitingRoom> createState() => _waitingRoomState(roomParticipants,roomId);
+  State<waitingRoom> createState() => _waitingRoomState(roomParticipants,roomId,isAdmin);
 }
 
 class _waitingRoomState extends State<waitingRoom> {
    final CollectionReference roomParticipants;
    String roomId;
+   bool isAdmin;
 
-  _waitingRoomState(this.roomParticipants,this.roomId);
+  _waitingRoomState(this.roomParticipants,this.roomId,this.isAdmin);
+
+  @override
+  void initState(){
+    if(isAdmin==false){
+      shift();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,19 +49,56 @@ class _waitingRoomState extends State<waitingRoom> {
               )
             ],
           ),
-          body: Container(
-            child: candidateList()
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(child: Container(
+                child: candidateList(),
+              )),
+              if(isAdmin==true)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child:ElevatedButton(
+                      onPressed: () async{
+                        await roomParticipants.snapshots().listen((snapshot) {
+                        if(isAdmin==true){
+                          roomParticipants.doc("StartButtonPressed").update({'isPressed':true});
+                        }
+                        var check = snapshot.docs.firstWhere((doc) => doc.id=="StartButtonPressed");
+                        if(check!=null && check.get('isPressed')==true){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,),),
+                          );
+                        }
+                      });
+                    },
+                    child: Text("START"),
+                  ),
+                )
+            ],
           ),
         )
     );
   }
+  void shift(){
+    roomParticipants.snapshots().listen((snapshot) {
+      var check = snapshot.docs.firstWhere((doc) => doc.id=="StartButtonPressed");
+      if(check!=null && check.get('isPressed')==true){
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,),),
+        );
+      }
+    });
+  }
   List<Gamer> _GamerlistfromSnapshot(QuerySnapshot? snapshot){
-    return snapshot!.docs.map((doc) {
-      return Gamer(
-          name: doc.get('Name') ?? '',
-          points: doc.get('points') ?? 0,
-          rank: doc.get('rank') ?? 0
-      );
+    return snapshot!.docs.where((doc) => doc.id.length>20).map((doc) {
+        return Gamer(
+            name: doc.get('Name') ?? '',
+            points: doc.get('points') ?? 0,
+            rank: doc.get('rank') ?? 0
+        );
     }).toList();
   }
    Stream<List<Gamer>> get candidates{

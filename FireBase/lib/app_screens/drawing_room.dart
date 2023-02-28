@@ -29,6 +29,9 @@ class roomLogin extends State<room>{
   Random random = new Random();
   String? Id;
 
+  // keeping track of the room admin
+  bool isAdmin = false;
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider<QuerySnapshot?>.value(
@@ -56,21 +59,23 @@ class roomLogin extends State<room>{
                 SizedBox(height: 20.0,),
                 ElevatedButton(
                     onPressed: () async {
-                      debugPrint("Till here");
+                      // debugPrint("Till here");
                       int randomNumber;
                       do{
                         randomNumber = 100000 + random.nextInt(1000000 - 100000);
                       }while(roomId.contains(randomNumber));
                       roomId.add(randomNumber);
-                      debugPrint("Till here");
+                      // debugPrint("Till here");
                       roomParticipants = FirebaseFirestore.instance.collection(randomNumber.toString());
                       var userId = auth.currentUser!.uid;
                       var userData = await firestore.collection('Players').doc(userId).get();
                       await roomParticipants.doc(userId).set(userData.data());
+                      await roomParticipants.doc("StartButtonPressed").set({'isPressed':false});
                       debugPrint(randomNumber.toString());
+                      isAdmin=true;
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: randomNumber.toString(),)),
+                        MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: randomNumber.toString(),isAdmin: isAdmin)),
                       );
                     },
                     child: Text("CREATE")
@@ -95,7 +100,7 @@ class roomLogin extends State<room>{
                       await roomParticipants.doc(userId).set(userData.data());
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: Id!,)),
+                        MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: Id!,isAdmin: isAdmin,)),
                       );
                     },
                     child: Text("Enter")
