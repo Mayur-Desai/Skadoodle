@@ -5,24 +5,63 @@ import 'package:flutter/material.dart';
 
 class Draw extends StatefulWidget{
   final CollectionReference roomParticipants;
-  Draw({required this.roomParticipants});
+  String roomId;
+  final CollectionReference points;
+  Draw({required this.roomParticipants,required this.roomId,required this.points});
   @override
-  _DrawState createState() => _DrawState(roomParticipants: roomParticipants);
+  _DrawState createState() => _DrawState(roomParticipants: roomParticipants,roomId: roomId,pointsCollection: points);
   
 }
 class _DrawState extends State<Draw>{
   final CollectionReference roomParticipants;
+  String roomId;
   List<DrawModel?> pointsList = [];
-  final pointsStream = BehaviorSubject<List<DrawModel?>>(); // acts as a stack
+  // final pointsStream = BehaviorSubject<List<DrawModel?>>(); // acts as a stack
   GlobalKey key =GlobalKey();
   bool _isDrawing = false;
-  _DrawState({required this.roomParticipants});
-  //closing the BehaviorSubject
-  @override
-  void dispose(){
-    pointsStream.close();
-    super.dispose();
+  final CollectionReference pointsCollection;
+  int count=100000000;
+  int i=0;
+  List<DrawModel?> pointslist=[];
+
+
+
+  _DrawState({required this.roomParticipants,required this.roomId,required this.pointsCollection});
+
+
+  // @override
+  // void initState() {
+  //   draw();
+  // }
+
+  Future<void> _addpointslist(DrawModel points) async {
+    try{
+      await pointsCollection.doc((count++).toString()).set({
+        'x':points.offset.dx,
+        'y':points.offset.dy,
+        'color':points.paint.color.value,
+        'strokewidth':points.paint.strokeWidth
+      });
+    }catch(e){
+      debugPrint(e.toString());
+    }
   }
+//   Future<void> _markasend() async {
+//     try{
+//       await pointsCollection.doc((count++).toString()).set({
+//
+//       });
+//     }catch(e){
+//
+//     }
+// }
+
+  //closing the BehaviorSubject
+  // @override
+  // void dispose(){
+  //   pointsStream.close();
+  //   super.dispose();
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,8 +77,10 @@ class _DrawState extends State<Draw>{
             paint.strokeWidth = 7.0;
             paint.strokeCap = StrokeCap.round;
             pointsList.add(DrawModel(renderBox.globalToLocal(details.globalPosition), paint));
-            pointsStream.add(pointsList);
+            // pointsStream.add(pointsList);
             //add to database
+            _addpointslist(pointsList.last!);
+            // draw();
             _isDrawing = true;
           });
         },
@@ -53,16 +94,19 @@ class _DrawState extends State<Draw>{
           //The globalPosition property is a Offset object that contains two properties, dx and dy,
           // representing the horizontal and vertical coordinates of the touch event, respectively
           pointsList.add(DrawModel(renderBox.globalToLocal(details.globalPosition), paint));
-          pointsStream.add(pointsList);
+          // pointsStream.add(pointsList);
           //add to database
+          _addpointslist(pointsList.last!);
+          // draw();
         },
         onPanEnd: (details){
           // pointsList.forEach((point) {
           //   debugPrint('offset=${point!.offset}, paint=${point.paint}');
           // });
           setState(() {
-            pointsList.add(null);
-            pointsStream.add(pointsList);
+            // pointsList.add(null);
+            // _addpointslist(pointsList.last!);
+            // pointsStream.add(pointsList);
             _isDrawing = false;
           });
         },
@@ -71,19 +115,61 @@ class _DrawState extends State<Draw>{
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
 
-        child: StreamBuilder<List<DrawModel?>>(
-          stream: pointsStream.stream,
-          builder: (context, snapshot) {
+        // child: StreamBuilder<List<DrawModel?>>(
+        //   stream: pointsStream.stream,
+        //   builder: (context, snapshot) {
+        //     return CustomPaint(
+        //       painter: DrawingPainter((snapshot.data??[])),
+        //     );
+        //   }
+        // ),
+        child: StreamBuilder<QuerySnapshot?>(
+          // stream: FirebaseFirestore.instance
+          //     .collection('points$roomId')
+          //     .orderBy(FieldPath.documentId, descending: false)
+          //     .snapshots(),
+          stream: pointsCollection.snapshots(),
+          builder: (context,snapshot){
+            if(!snapshot.hasData){
+              return CustomPaint(
+                painter: DrawingPainter(pointsList),
+              );
+            }
+            List<DocumentSnapshot> documents = snapshot.data!.docs;
+            // pointsList = documents.map((doc) {
+            //   // debugPrint(doc.id.toString());
+            //   return DrawModel(
+            //       Offset(doc.get('x'),doc.get('y')),
+            //       Paint()
+            //         ..color = Color(doc.get('color'))
+            //         ..strokeWidth = doc.get('strokewidth'),
+            //   );
+            // }).toList();
+
+            while(i<documents.length){
+              // debugPrint(i.toString());
+              DocumentSnapshot doc = documents[i];
+              pointslist.add(DrawModel(
+                      Offset(doc.get('x'),doc.get('y')),
+                      Paint()
+                        ..color = Color(doc.get('color'))
+                        ..strokeWidth = doc.get('strokewidth'),
+                  ));
+              i++;
+            }
+            pointslist.add(null);
+            // pointsList.forEach((point) {
+            //   debugPrint('offset=${point!.offset}, paint=${point.paint}');
+            // });
             return CustomPaint(
-              painter: DrawingPainter((snapshot.data??[])),
+                painter: DrawingPainter(pointslist)
             );
-          }
+          },
         ),
       ),
     ));
   }
 }// _DrawState
-
 
 class DrawingPainter extends CustomPainter{ //declaring our custom painter
   final List<DrawModel?> pointsList;
@@ -109,7 +195,6 @@ class DrawingPainter extends CustomPainter{ //declaring our custom painter
     return true;
   }
 }
-
 
 class DrawModel{
   final Offset offset;

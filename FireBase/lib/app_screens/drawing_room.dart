@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
+import './game_settings.dart';
 import './waiting_room.dart';
 
 class room extends StatefulWidget {
@@ -70,12 +71,18 @@ class roomLogin extends State<room>{
                       var userId = auth.currentUser!.uid;
                       var userData = await firestore.collection('Players').doc(userId).get();
                       await roomParticipants.doc(userId).set(userData.data());
-                      await roomParticipants.doc("StartButtonPressed").set({'isPressed':false});
+                      await roomParticipants.doc("Parameters").set({
+                        'isPressed':false,
+                        'rounds':0,
+                        'duration':0,
+                        'word_count':3,
+                        'Hints':2
+                      });
                       debugPrint(randomNumber.toString());
                       isAdmin=true;
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: randomNumber.toString(),isAdmin: isAdmin)),
+                        MaterialPageRoute(builder: (context) => GameSettings(roomParticipants: roomParticipants,roomId: randomNumber.toString(),isAdmin: isAdmin)),
                       );
                     },
                     child: Text("CREATE")

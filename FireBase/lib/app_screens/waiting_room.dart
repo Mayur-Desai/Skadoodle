@@ -20,8 +20,8 @@ class _waitingRoomState extends State<waitingRoom> {
    final CollectionReference roomParticipants;
    String roomId;
    bool isAdmin;
-
   _waitingRoomState(this.roomParticipants,this.roomId,this.isAdmin);
+  late CollectionReference points;
 
   @override
   void initState(){
@@ -60,18 +60,12 @@ class _waitingRoomState extends State<waitingRoom> {
                   alignment: Alignment.bottomCenter,
                   child:ElevatedButton(
                       onPressed: () async{
-                        await roomParticipants.snapshots().listen((snapshot) {
-                        if(isAdmin==true){
-                          roomParticipants.doc("StartButtonPressed").update({'isPressed':true});
-                        }
-                        var check = snapshot.docs.firstWhere((doc) => doc.id=="StartButtonPressed");
-                        if(check!=null && check.get('isPressed')==true){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,),),
-                          );
-                        }
-                      });
+                         await roomParticipants.doc("Parameters").update({'isPressed':true});
+                         points = FirebaseFirestore.instance.collection('points$roomId');
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,roomId: roomId,points: points,)),
+                         );
                     },
                     child: Text("START"),
                   ),
@@ -83,11 +77,12 @@ class _waitingRoomState extends State<waitingRoom> {
   }
   void shift(){
     roomParticipants.snapshots().listen((snapshot) {
-      var check = snapshot.docs.firstWhere((doc) => doc.id=="StartButtonPressed");
+      var check = snapshot.docs.firstWhere((doc) => doc.id=="Parameters");
       if(check!=null && check.get('isPressed')==true){
+        points = FirebaseFirestore.instance.collection('points$roomId');
         Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,),),
+            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,roomId: roomId,points: points,),),
         );
       }
     });
