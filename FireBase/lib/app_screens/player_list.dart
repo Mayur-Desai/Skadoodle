@@ -1,11 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/gamer.dart';
+import '../models/User.dart';
 
 class playerTile extends StatelessWidget {
   final Gamer gamer;
-  playerTile({required this.gamer});
+  bool isAdmin;
+  final CollectionReference roomParticipants;
+  playerTile({required this.gamer,required this.isAdmin,required this.roomParticipants});
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserModel?>(context);
     return Padding(
         padding: EdgeInsets.only(top: 10.0),
         child: Card(
@@ -16,7 +22,16 @@ class playerTile extends StatelessWidget {
             ),
             title: Text(gamer.name),
             subtitle: Text(gamer.points.toString()),
-            trailing: Icon(Icons.add_box_outlined),
+            trailing: IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: ()  {
+                roomParticipants.doc(user?.uid).delete();
+                if(isAdmin==true){
+                  Navigator.pop(context);
+                }
+                Navigator.pop(context);
+              },
+            ),
           ),
         ),
     );
