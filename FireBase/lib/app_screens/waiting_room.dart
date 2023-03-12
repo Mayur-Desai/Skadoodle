@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import './canvas_widget.dart';
 import './drawing_room.dart';
 import './candidates_list.dart';
 import '../models/gamer.dart';
-import './canvas_widget.dart';
+import './game_play.dart';
 class waitingRoom extends StatefulWidget {
   final CollectionReference roomParticipants;
   String roomId;
@@ -21,7 +23,8 @@ class _waitingRoomState extends State<waitingRoom> {
    String roomId;
    bool isAdmin;
   _waitingRoomState(this.roomParticipants,this.roomId,this.isAdmin);
-  late CollectionReference points;
+   DatabaseReference database = FirebaseDatabase.instance.refFromURL('https://playerroom-e0b9d-default-rtdb.asia-southeast1.firebasedatabase.app');
+  late final pointsCollection;
 
   @override
   void initState(){
@@ -53,7 +56,7 @@ class _waitingRoomState extends State<waitingRoom> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(child: Container(
-                child: candidateList(),
+                child: candidateList(iswaiting:true,isAdmin:isAdmin,roomParticipants:roomParticipants),
               )),
               if(isAdmin==true)
                 Align(
@@ -61,10 +64,10 @@ class _waitingRoomState extends State<waitingRoom> {
                   child:ElevatedButton(
                       onPressed: () async{
                          await roomParticipants.doc("Parameters").update({'isPressed':true});
-                         points = FirebaseFirestore.instance.collection('points$roomId');
+                         pointsCollection= database.child('Points/points$roomId');
                          Navigator.push(
                            context,
-                           MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,roomId: roomId,points: points,)),
+                           MaterialPageRoute(builder: (context) => GamePlay(room: roomParticipants, roomId: roomId, pointsCollection: pointsCollection)),
                          );
                     },
                     child: Text("START"),
@@ -78,11 +81,15 @@ class _waitingRoomState extends State<waitingRoom> {
   void shift(){
     roomParticipants.snapshots().listen((snapshot) {
       var check = snapshot.docs.firstWhere((doc) => doc.id=="Parameters");
+      var l = snapshot.docs.length;
+      if(l==1){
+        deleteCollection(roomId);
+      }
       if(check!=null && check.get('isPressed')==true){
-        points = FirebaseFirestore.instance.collection('points$roomId');
+        pointsCollection= database.child('Points/points$roomId');
         Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Draw(roomParticipants: roomParticipants,roomId: roomId,points: points,),),
+            MaterialPageRoute(builder: (context) => GamePlay(room: roomParticipants, roomId: roomId, pointsCollection: pointsCollection)),
         );
       }
     });
@@ -91,13 +98,21 @@ class _waitingRoomState extends State<waitingRoom> {
     return snapshot!.docs.where((doc) => doc.id.length>20).map((doc) {
         return Gamer(
             name: doc.get('Name') ?? '',
-            points: doc.get('points') ?? 0,
-            rank: doc.get('rank') ?? 0
+            points: 0,
+            rank: 0
         );
     }).toList();
   }
    Stream<List<Gamer>> get candidates{
      return roomParticipants.snapshots()
          .map(_GamerlistfromSnapshot);
+   }
+   void deleteCollection(String collectionPath) async {
+     CollectionReference collectionRef = FirebaseFirestore.instance.collection(collectionPath);
+     QuerySnapshot querySnapshot = await collectionRef.get();
+     for (DocumentSnapshot docSnapshot in querySnapshot.docs) {
+       await docSnapshot.reference.delete();
+     }
+     await collectionRef.parent!.delete();
    }
 }

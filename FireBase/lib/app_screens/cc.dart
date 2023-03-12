@@ -64,7 +64,8 @@ class _DrawState extends State<Draw>{
   Widget build(BuildContext context) {
     return Scaffold(
         key: key,
-        body: GestureDetector(
+        body:
+        GestureDetector(
           onPanDown: (details){
             setState(() {
               //we want to access the low-level layout and painting properties of the widget we are casting the RenderObject method's result as RenderBox

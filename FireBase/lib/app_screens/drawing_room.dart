@@ -21,7 +21,6 @@ class roomLogin extends State<room>{
   // used to create a private room
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-
   // instance to create a new collection
   late CollectionReference roomParticipants;
 
@@ -71,12 +70,14 @@ class roomLogin extends State<room>{
                       var userId = auth.currentUser!.uid;
                       var userData = await firestore.collection('Players').doc(userId).get();
                       await roomParticipants.doc(userId).set(userData.data());
+                      Map<String,int> data = {userData.get('Name'):0};
                       await roomParticipants.doc("Parameters").set({
                         'isPressed':false,
                         'rounds':0,
                         'duration':0,
                         'word_count':3,
-                        'Hints':2
+                        'Hints':2,
+                        'pointsList':data
                       });
                       debugPrint(randomNumber.toString());
                       isAdmin=true;
@@ -105,6 +106,10 @@ class roomLogin extends State<room>{
                       var userId = auth.currentUser!.uid;
                       var userData = await firestore.collection('Players').doc(userId).get();
                       await roomParticipants.doc(userId).set(userData.data());
+                      var sd = await roomParticipants.doc('Parameters').get();
+                      Map<String,int> data = sd.get('pointsList');
+                      data[userData.get('Name')]=0;
+                      await roomParticipants.doc('Parameters').update({'pointsList':data});
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => waitingRoom(roomParticipants: roomParticipants,roomId: Id!,isAdmin: isAdmin,)),
