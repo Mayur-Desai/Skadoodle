@@ -20,7 +20,7 @@ class homePage extends StatefulWidget {
   State<homePage> createState() => _homePageState();
 }
 
-class _homePageState extends State<homePage> {
+class _homePageState extends State<homePage> with WidgetsBindingObserver {
   Random random = new Random();
 
   Set roomId={};
@@ -88,15 +88,18 @@ class _homePageState extends State<homePage> {
       'word_choosen':'',
       'pointsList':data
     });
-    roomParticipants.doc(userId).update({'isDrawing':true});
+    roomParticipants.doc(userId).update({'isDrawing':false});
 
     debugPrint(randomNumber.toString());
     isAdmin=true;
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => GameSettings(roomParticipants: roomParticipants,roomId: randomNumber.toString(),isAdmin: isAdmin,Name:name)),
+    ).then((value) {
+      isAdmin=false;
+      debugPrint("home::"+isAdmin.toString());
+    }
     );
-
    }
 
 
@@ -118,7 +121,7 @@ class _homePageState extends State<homePage> {
         backgroundColor: Colors.grey[300],
       appBar: AppBar(
         centerTitle: true,
-        leading:const Icon(Icons.menu,color: Colors.black54,),
+        //leading:const Icon(Icons.menu,color: Colors.black54,),
         title:Text(
           userModel.UserName,
             style: TextStyle(
@@ -133,8 +136,18 @@ class _homePageState extends State<homePage> {
           GestureDetector(
             onTap:signUserOut,
             child: Container(
-              // child: IconButton(onPressed:(){}, icon: const Image(image: AssetImage('images/mik.gif')),),
-              child: Image.asset('images/mik.gif',height: 125.0, width: 125.0,),
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: const Row(
+                children: [
+                  Text("Logout"),
+                  SizedBox(width: 5,),
+                  Icon(size: 19.0,
+                   Icons.exit_to_app,
+                    color: Colors.blueGrey,
+                  )
+                ],
+              ),
+
             ),
           )
         ],
@@ -145,135 +158,162 @@ class _homePageState extends State<homePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
 
-                const SizedBox(height:200),
+                const SizedBox(height:150),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:25),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children:  [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(32),
-                          child: Image.asset(
-                            'images/itachi.png',
-                            width: 100,
-                            height: 80,)
-                      ),
-
-                      const SizedBox(width: 30,),
-
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children:  [
-                            Text('HOST',
-                                style: TextStyle(
-                                  color:Colors.blueGrey[400],
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                )
-                            ),
-
-
-                            const Divider(
-                                    thickness: 1,
-                                    color: Colors.brown,
-                            ),
-
-                            CreateRoomButton(
-                               onTap: CreateRoom,
-                            )
-                          ],
+                  padding: const EdgeInsets.symmetric(horizontal:15),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF343434).withOpacity(0.4),
+                              Color(0xFF343434).withOpacity(0.15),
+                            ]),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children:  [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(32),
+                            child: Image.asset(
+                              'images/itachi.png',
+                              width: 100,
+                              height: 80,)
                         ),
-                      )
+
+                        const SizedBox(width: 30,),
+
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children:  [
+                              Text('HOST',
+                                  style: TextStyle(
+                                    color:Colors.blueGrey[400],
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  )
+                              ),
 
 
-                    ],
+                              const Divider(
+                                      thickness: 1,
+                                      color: Colors.brown,
+                              ),
+
+                              CreateRoomButton(
+                                 onTap: CreateRoom,
+                              )
+                            ],
+                          ),
+                        )
+
+
+                      ],
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 200,),
+                const SizedBox(height: 100,),
 
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal:15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children:  [
-                      ClipRRect(
-                          child: Image.asset(
-                            'images/demonslay.png',
-                            width: 150,
-                            height: 160, )
-                      ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFF343434).withOpacity(0.4),
+                            Color(0xFF343434).withOpacity(0.15),
+                          ]),
+                      borderRadius: BorderRadius.circular(20),
 
-                      const SizedBox(width: 0,),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children:  [
+                        ClipRRect(
+                            child: Image.asset(
+                              'images/demonslay.png',
+                              width: 150,
+                              height: 160, )
+                        ),
 
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children:  [
-                            Text('JOIN',
-                                style: TextStyle(
-                                  color:Colors.blueGrey[400],
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                )
-                            ),
+                        const SizedBox(width: 0,),
+
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children:  [
+                              Text('JOIN',
+                                  style: TextStyle(
+                                    color:Colors.blueGrey[400],
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  )
+                              ),
 
 
-                            const Divider(
-                              thickness: 1,
-                              color: Colors.brown,
-                            ),
+                              const Divider(
+                                thickness: 1,
+                                color: Colors.brown,
+                              ),
 
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
 
-                                  const SizedBox(width: 10,),
+                                    const SizedBox(width: 10,),
 
-                                  Expanded(
-                                    child: TextField(
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                        isCollapsed: true,
-                                        contentPadding: const EdgeInsets.all(9),
-                                        enabledBorder:  OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(15),
-                                            borderSide: const BorderSide(color: Colors.white)
+                                    Expanded(
+                                      child: TextField(
+                                        textAlign: TextAlign.center,
+                                        decoration: InputDecoration(
+                                          isCollapsed: true,
+                                          contentPadding: const EdgeInsets.all(9),
+                                          enabledBorder:  OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(15),
+                                              borderSide: const BorderSide(color: Colors.white)
+                                          ),
+                                          focusedBorder:  OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(15.0),
+                                              borderSide: const BorderSide(color: Colors.blueGrey)
+                                          ),
+
+
+                                          fillColor: Colors.white54,
+                                          filled: true,
+                                          hintText: 'Enter Code'
+
                                         ),
-                                        focusedBorder:  OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(15.0),
-                                            borderSide: const BorderSide(color: Colors.blueGrey)
-                                        ),
+                                        keyboardType: TextInputType.number,
+                                        controller: CodeController,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
 
-
-                                        fillColor: Colors.white54,
-                                        filled: true,
-                                        hintText: 'Enter Code'
 
                                       ),
-                                      keyboardType: TextInputType.number,
-                                      controller: CodeController,
-                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-
-
                                     ),
-                                  ),
 
 
-                                  IconButton(onPressed: JoinRoom,
-                                      icon: const Icon(Icons.arrow_circle_right_outlined )),
-                                ]
+                                    IconButton(onPressed: JoinRoom,
+                                        icon: const Icon(Icons.arrow_circle_right_outlined )),
+                                  ]
 
-                            )
-                          ],
-                        ),
-                      )
+                              )
+                            ],
+                          ),
+                        )
 
 
-                    ],
+                      ],
+                    ),
                   ),
                 )
               ]

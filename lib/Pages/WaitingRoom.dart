@@ -108,10 +108,10 @@ class _waitingRoomState extends State<waitingRoom> {
       if(check!=null && check.get('isPressed')==true){
         pointsCollection= database.child('Points/points$roomId');
         var List = check.get('pointsList').entries.toList();
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => GamePlay(room: roomParticipants, roomId: roomId, pointsCollection: pointsCollection,isAdmin: isAdmin,Name:Name,playerList:List,r:r)),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GamePlay(room: roomParticipants, roomId: roomId, pointsCollection: pointsCollection,isAdmin: isAdmin,Name:Name,playerList:List,r:r)),
+        );
       }
     });
   }

@@ -492,258 +492,271 @@ class _GamePlayState extends State<GamePlay> {
   Widget build(BuildContext context) {
     String strDigits(int n) => n.toString().padLeft(2, '0');
     final seconds = strDigits(myDuration.inSeconds.remainder(duration));
-    debugPrint('check');
+    debugPrint(seconds.toString());
     update(seconds);
-    return StreamProvider<List<Gamer>?>.value(
-      value: Players,
-      initialData: null,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-          body: Column(
-            children: [
-              //guess word and time
-              PreferredSize(
-                preferredSize: Size.fromHeight(kToolbarHeight),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.grey,
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.black26,
-                        ),
-                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(17),bottomRight: Radius.circular(17))
-                    ),
-                    height: 50,
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                      children: [
-                        // SizedBox(width: 5,),
-                        Image.asset('images/timer.gif',height: 45.0, width: 45.0,),
-                        Text(
-                          ':$seconds',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 35,),
-                        Image.asset('images/rounds.gif',height: 35.0, width: 35.0,),
-                        Text(
-                          ':'+rounds.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 45,),
-                        Text(
-                          setValue(seconds),
-                          style: TextStyle(
-                              color: Colors.deepPurple,
-                              fontSize: 20,
-                              fontFamily: 'JoseFins'
-                          ),
-                        ),
-                        SizedBox(width: 45,),
-                        TextButton.icon(
-                          icon: Icon(Icons.arrow_circle_right,color: Colors.white38,),
-                          onPressed: (){
-                            room.doc(userId).delete();
-                            if(isAdmin==true){
-                              Navigator.pop(context);
-                            }
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                          label: Text(''),
-                        )
-                      ],
-                    ),
-                    // width: 100,
-                  ),
-                ),
-              ),
-              //Drawing area
-              SizedBox(
-                height: 350,
-                child: Container(
-                  child: Draw(roomId: roomId),
-                ),
-              ),
-              Expanded(
-                  child:Container(
-                    decoration: BoxDecoration(
-                        color: Colors.grey,
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.black26,
-                        ),
-                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(17),bottomRight: Radius.circular(17))
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          // contestants list
-                          // flex:2,
-                          child: Container(
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: Colors.brown[400],
-                                border: Border.all(
-                                  width: 1,
-                                  color: Colors.black26,
-                                ),
-                                borderRadius: BorderRadius.all(Radius.circular(10))
+    return WillPopScope(
+      onWillPop: ()async{
+        isDrawing=false;
+        print("back button pressed");
+
+        return true;
+      },
+      child: StreamProvider<List<Gamer>?>.value(
+        value: Players,
+        initialData: null,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+              body: Column(
+                children: [
+                  //guess word and time
+                  PreferredSize(
+                    preferredSize: Size.fromHeight(kToolbarHeight),
+                    child: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.black26,
                             ),
-                            child: candidateList(iswaiting:false,isAdmin:true,roomParticipants:room),
-                            // width: 100,
-                          ),
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(17),bottomRight: Radius.circular(17))
                         ),
-                        Flexible(
-                          // flex: 2,
-                            child: Container(
-                              margin: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                  color: Colors.brown[400],
-                                  border: Border.all(
-                                    width: 1,
-                                    color: Colors.black26,
-                                  ),
-                                  borderRadius: BorderRadius.all(Radius.circular(10))
-                              ),
-                              child: FirebaseAnimatedList(
-                                  controller: _scrollController,
-                                  // shrinkWrap: true,
-                                  query: chats.orderByChild('timestamp'),
-                                  itemBuilder: (BuildContext context,DataSnapshot snapshot,Animation<double> nimation,int index){
-                                    var data = jsonDecode(jsonEncode(snapshot.value));
-                                    // debugPrint(data.toString());
-                                    String n = data.keys.first;
-                                    // if(n!=null){//how to get the condition where there is a card?
-                                    //   _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(microseconds: 500), curve: Curves.easeOut);
-                                    // }
-                                    if (index == 0) {
-                                      // return the header
-                                      return Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children:  [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Text("Chats",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.lightGreenAccent,
-                                                    fontSize: 18
-                                                ),
-                                              ),
-                                              SizedBox(width: 10,),
+                        height: 50,
+                        child: Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                                              ClipRRect(
-                                                borderRadius: BorderRadius.circular(18.0),
-                                                child: Image.asset('images/chat.jpg',height: 25.0, width: 25.0,),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                    index -= 1;
-                                    return Card(
-                                      shape: BeveledRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                      ),
-                                      margin: const EdgeInsets.all(5) ,
-                                      child: ListTile(
-                                        shape: BeveledRectangleBorder( //<-- SEE HERE
-                                          //side: BorderSide(width: 1),
-                                          side: BorderSide(
-                                            width: 1,
-                                            color: Colors.black54,
-                                          ),
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        title: Text(
-                                          "  "+n,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-
-                                        dense: true,
-                                        visualDensity: VisualDensity(vertical: -4),
-                                        tileColor: data[n]=='has guessed the word!'?Colors.green:Colors.yellow,
-                                        subtitle: Text(
-                                          "        "+ data[n],
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
+                          children: [
+                            // SizedBox(width: 5,),
+                            Image.asset('images/timer.gif',height: 45.0, width: 45.0,),
+                            Text(
+                              ':$seconds',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
-
-                        )
-                      ],
-                    ),
-                  )
-              ),
-              SizedBox(height: 7,),
-              PreferredSize(
-                  preferredSize: Size.fromHeight(kBottomNavigationBarHeight),
-                  child: Container(
-                    height: 30,
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Guess Here!',
+                            SizedBox(width: 35,),
+                            Image.asset('images/rounds.gif',height: 35.0, width: 35.0,),
+                            Text(
+                              ':'+rounds.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 45,),
+                            Text(
+                              setValue(seconds),
+                              style: TextStyle(
+                                  color: Colors.deepPurple,
+                                  fontSize: 20,
+                                  fontFamily: 'JoseFins'
+                              ),
+                            ),
+                            SizedBox(width: 45,),
+                            TextButton.icon(
+                              icon: Icon(Icons.arrow_circle_right,color: Colors.white38,),
+                              onPressed: (){
+                                isDrawing=false;
+                                room.doc(userId).delete();
+                                if(isAdmin==true){
+                                  Navigator.pop(context);
+                                }
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                              label: Text(''),
+                            )
+                          ],
+                        ),
+                        // width: 100,
                       ),
-                      onSubmitted: (val) async {
-                        setState(()  {
-                          guess=val;
-                          if(guess.similarityTo(word_choose.toLowerCase())>=0.6 && guess!=word_choose.toLowerCase()){
-                            showToast();
-                          }
-                          chats.push().set({
-                            Name:guess==word_choose.toLowerCase()?isDrawing==false?'has guessed the word!':guess:guess,
-                            'timestamp': ServerValue.timestamp
-                          }).asStream;
-                          _textController.clear();
-                          _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.easeOut,
-                          );
-                        });
-                        if(guess==word_choose.toLowerCase() && guessed==false && isDrawing==false){
-                          debugPrint("Guessed");
-                          debugPrint(seconds);
-                          double dd=1250/(duration-(int.parse(seconds)));
-                          data=double.parse(((dd)+20).toStringAsFixed(2));
-                          debugPrint("guessed point: "+data.toString());
-                          var got= await room.doc(userId).get();
-                          tt = (got.get('points')+data).toInt();
-                          debugPrint("total:$tt");
-                          var gotit= await room.doc('Parameters').get();
-                          var list = gotit.get('pointsList');
-                          list[Name]=[tt,data.toInt()];
-                          await room.doc('Parameters').update({'pointsList': list});
-                          await room.doc(userId).update({'guessed':true});
-                          guessed=true;
-                        }
-                      },
                     ),
+                  ),
+                  //Drawing area
+                  SizedBox(
+                    height: 350,
+                    child: Container(
+                      child: Draw(roomId: roomId),
+                    ),
+                  ),
+                  Expanded(
+                      child:Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.black26,
+                            ),
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(17),bottomRight: Radius.circular(17))
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              // contestants list
+                              // flex:2,
+                              child: Container(
+                                margin: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    color: Colors.brown[400],
+                                    border: Border.all(
+                                      width: 1,
+                                      color: Colors.black26,
+                                    ),
+                                    borderRadius: BorderRadius.all(Radius.circular(10))
+                                ),
+                                child: candidateList(iswaiting:false,isAdmin:true,roomParticipants:room),
+                                // width: 100,
+                              ),
+                            ),
+                            Flexible(
+                              // flex: 2,
+                                child: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      color: Colors.brown[400],
+                                      border: Border.all(
+                                        width: 1,
+                                        color: Colors.black26,
+                                      ),
+                                      borderRadius: BorderRadius.all(Radius.circular(10))
+                                  ),
+                                  child: FirebaseAnimatedList(
+                                      controller: _scrollController,
+                                      // shrinkWrap: true,
+                                      query: chats.orderByChild('timestamp'),
+                                      itemBuilder: (BuildContext context,DataSnapshot snapshot,Animation<double> nimation,int index){
+                                        var data = jsonDecode(jsonEncode(snapshot.value));
+                                        // debugPrint(data.toString());
+                                        String n = data.keys.first;
+                                        // if(n!=null){//how to get the condition where there is a card?
+                                        //   _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(microseconds: 500), curve: Curves.easeOut);
+                                        // }
+                                        if (index == 0) {
+                                          // return the header
+                                          return Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children:  [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Text("Chats",
+                                                    style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.lightGreenAccent,
+                                                        fontSize: 18
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 10,),
+
+                                                  ClipRRect(
+                                                    borderRadius: BorderRadius.circular(18.0),
+                                                    child: Image.asset('images/chat.jpg',height: 25.0, width: 25.0,),
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        }
+                                        index -= 1;
+                                        return Card(
+                                          shape: BeveledRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                          ),
+                                          margin: const EdgeInsets.all(5) ,
+                                          child: ListTile(
+                                            shape: BeveledRectangleBorder( //<-- SEE HERE
+                                              //side: BorderSide(width: 1),
+                                              side: BorderSide(
+                                                width: 1,
+                                                color: Colors.black54,
+                                              ),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            title: Text(
+                                              "  "+n,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+
+                                            dense: true,
+                                            visualDensity: VisualDensity(vertical: -4),
+                                            tileColor: data[n]=='has guessed the word!'?Colors.green:Colors.yellow,
+                                            subtitle: Text(
+                                              "        "+ data[n],
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                  ),
+                                ),
+
+                            )
+                          ],
+                        ),
+                      )
+                  ),
+                  SizedBox(height: 7,),
+                  PreferredSize(
+                      preferredSize: Size.fromHeight(kBottomNavigationBarHeight),
+                      child: Container(
+                        height: 30,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _textController,
+                          decoration: const InputDecoration(
+                            hintText: 'Guess Here!',
+                          ),
+                          onSubmitted: (val) async {
+                            setState(()  {
+                              guess=val;
+                              if(guess.similarityTo(word_choose.toLowerCase())>=0.6 && guess!=word_choose.toLowerCase()){
+                                showToast();
+                              }
+                              chats.push().set({
+                                Name:guess==word_choose.toLowerCase()?isDrawing==false?'has guessed the word!':guess:guess,
+                                'timestamp': ServerValue.timestamp
+                              }).asStream;
+                              _textController.clear();
+                              _scrollController.animateTo(
+                                _scrollController.position.maxScrollExtent,
+                                duration: Duration(milliseconds: 500),
+                                curve: Curves.easeOut,
+                              );
+                            });
+                            if(guess==word_choose.toLowerCase() && guessed==false && isDrawing==false){
+                              debugPrint("Guessed");
+                              debugPrint(seconds);
+                              double dd=1250/(duration-(int.parse(seconds)));
+                              data=double.parse(((dd)+20).toStringAsFixed(2));
+                              debugPrint("guessed point: "+data.toString());
+                              var got= await room.doc(userId).get();
+                              tt = (got.get('points')+data).toInt();
+                              debugPrint("total:$tt");
+                              var gotit= await room.doc('Parameters').get();
+                              var list = gotit.get('pointsList');
+                              list[Name]=[tt,data.toInt()];
+                              await room.doc('Parameters').update({'pointsList': list});
+                              await room.doc(userId).update({'guessed':true});
+                              guessed=true;
+                            }
+                          },
+                        ),
+                      )
                   )
+                ],
               )
-            ],
-          )
+          ),
+        ),
       ),
     );
   }

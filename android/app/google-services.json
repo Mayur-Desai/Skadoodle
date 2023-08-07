@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "757500434994",
+    "firebase_url": "https://dancingmonkey-6e76d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "dancingmonkey-6e76d",
+    "storage_bucket": "dancingmonkey-6e76d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757500434994:android:5c34cb10d2ac149ea47a2b",
+        "android_client_info": {
+          "package_name": "com.example.skadoodlem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757500434994-1f5vc1o88ftd9fmlve6on4122942kt23.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.skadoodlem",
+            "certificate_hash": "efa73e393bca1e988b25c3de7ba9b2387d1056aa"
+          }
+        },
+        {
+          "client_id": "757500434994-foha6u4lcip97mk94fkru6u3b2etimct.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWcfVwsxSYti-Utb5iKXO6Xz5LbB8JW1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757500434994-foha6u4lcip97mk94fkru6u3b2etimct.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757500434994-ifs4ki0mglc6hi5s4g2ja5r23jlh45gm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.skadoodlem"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
